@@ -2,7 +2,6 @@ import argparse
 import glob
 import json
 import os
-import re
 from typing import Any, Dict, Iterable, List
 
 
@@ -27,9 +26,9 @@ def normalize_answer(question: Dict[str, Any], options: List[str]) -> str:
     if 'answer' in question and question['answer'] not in (None, ''):
         answer = str(question['answer']).strip()
         if len(answer) == 1 and answer.isalpha() and options:
-            prefix_pattern = re.compile(rf"^{re.escape(answer.upper())}\.\s")
+            option_prefix = f"{answer.upper()}."
             prefix_matched_options = [
-                opt for opt in options if prefix_pattern.match(opt.strip().upper())
+                opt for opt in options if opt.strip().upper().startswith(option_prefix)
             ]
             if len(prefix_matched_options) == 1:
                 return prefix_matched_options[0]
@@ -142,7 +141,7 @@ def main() -> None:
 
     input_paths = resolve_inputs(args.inputs)
     if not input_paths:
-        raise FileNotFoundError('No valid input files found from --inputs.')
+        raise FileNotFoundError(f'No valid input files found from --inputs: {args.inputs}')
 
     output_dir = os.path.dirname(os.path.abspath(args.output))
     if output_dir:
