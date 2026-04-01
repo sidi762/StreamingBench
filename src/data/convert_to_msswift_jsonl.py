@@ -2,6 +2,7 @@ import argparse
 import glob
 import json
 import os
+import re
 from typing import Any, Dict, Iterable, List
 
 
@@ -26,10 +27,12 @@ def normalize_answer(question: Dict[str, Any], options: List[str]) -> str:
     if 'answer' in question and question['answer'] not in (None, ''):
         answer = str(question['answer']).strip()
         if len(answer) == 1 and answer.isalpha() and options:
-            prefix = f"{answer.upper()}."
-            matched_options = [opt for opt in options if opt.strip().upper().startswith(prefix)]
-            if len(matched_options) == 1:
-                return matched_options[0]
+            prefix_pattern = re.compile(rf"^{re.escape(answer.upper())}\.\s")
+            prefix_matched_options = [
+                opt for opt in options if prefix_pattern.match(opt.strip().upper())
+            ]
+            if len(prefix_matched_options) == 1:
+                return prefix_matched_options[0]
         return answer
 
     if 'ground_truth_output' in question and question['ground_truth_output'] not in (None, ''):
