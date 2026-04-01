@@ -138,7 +138,9 @@ def main() -> None:
     if not input_paths:
         raise FileNotFoundError('No valid input files found from --inputs.')
 
-    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
+    output_dir = os.path.dirname(os.path.abspath(args.output))
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
 
     total = 0
     with open(args.output, 'w', encoding='utf-8') as output_fp:
