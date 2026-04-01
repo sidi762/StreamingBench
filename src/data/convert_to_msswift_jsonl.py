@@ -108,7 +108,7 @@ def convert_file(input_path: str, output_fp, system_prompt: str) -> int:
 def resolve_inputs(inputs: List[str]) -> List[str]:
     paths: List[str] = []
     for item in inputs:
-        expanded = sorted(glob.glob(item))
+        expanded = sorted(glob.glob(item, recursive=True))
         if expanded:
             paths.extend(expanded)
         elif os.path.exists(item):
@@ -141,7 +141,10 @@ def main() -> None:
 
     input_paths = resolve_inputs(args.inputs)
     if not input_paths:
-        raise FileNotFoundError(f'No valid input files found from --inputs: {args.inputs}')
+        glob_matches = {item: len(glob.glob(item, recursive=True)) for item in args.inputs}
+        raise FileNotFoundError(
+            f'No valid input files found from --inputs: {args.inputs}; glob matches: {glob_matches}'
+        )
 
     output_dir = os.path.dirname(os.path.abspath(args.output))
     if output_dir:
