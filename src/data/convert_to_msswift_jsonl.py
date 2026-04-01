@@ -27,9 +27,9 @@ def normalize_answer(question: Dict[str, Any], options: List[str]) -> str:
         answer = str(question['answer']).strip()
         if len(answer) == 1 and answer.isalpha() and options:
             prefix = f"{answer.upper()}."
-            for opt in options:
-                if opt.strip().upper().startswith(prefix):
-                    return opt
+            matched_options = [opt for opt in options if opt.strip().upper().startswith(prefix)]
+            if len(matched_options) == 1:
+                return matched_options[0]
         return answer
 
     if 'ground_truth_output' in question and question['ground_truth_output'] not in (None, ''):
@@ -91,6 +91,9 @@ def convert_file(input_path: str, output_fp, system_prompt: str) -> int:
                 continue
 
             options = normalize_options(question.get('options'))
+            answer = normalize_answer(question, options)
+            if not answer:
+                continue
             record = {
                 'messages': to_messages(sample, question, options, system_prompt)
             }
